@@ -1,0 +1,14 @@
+.menuNavBar {
+    border: 1px solid red;
+    position: relative;
+    background: red;
+    display: inline-block;
+}
+// .menu ul {
+//     list-style: none;
+// }
+
+.menu {
+    position: absolute;
+    transition: 300ms all ease;
+}

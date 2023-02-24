@@ -1,10 +1,12 @@
+import { Layout } from "@/components/Layout";
 import axios from "axios";
 
 export default function Home({ rooms }) {
+ 
   if (rooms) {
     return (
       <>
-        {rooms.map((e) => {
+         {rooms.map((e) => {
           return (
             <div key={e._id}>
               <p>{e.nombre}</p>
@@ -12,6 +14,8 @@ export default function Home({ rooms }) {
           );
         })}
       </>
+       
+     
     );
   }
 }
