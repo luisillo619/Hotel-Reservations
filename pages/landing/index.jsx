@@ -7,6 +7,11 @@ export default function Landing () {
   return (
     <Layout>
       <h1 className={styles.pepe}>Landing</h1>
+      <div></div>
+      <div></div>
+      <div></div>
+
+
     </Layout>
   );
 };
