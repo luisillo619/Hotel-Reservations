@@ -4,7 +4,7 @@ import Category from "@/models/Category";
 import Joi from "joi";
 dbConnect();
 
-export default async function handlerProducts(req, res) {
+export default async function handlerRooms(req, res) {
   try {
     switch (req.method) {
       case "GET":
@@ -19,6 +19,7 @@ export default async function handlerProducts(req, res) {
     return res.status(500).json({ message: "Error del servidor" });
   }
 }
+
 
 const getRooms = async (req, res) => {
   try {

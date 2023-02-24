@@ -1,9 +1,10 @@
-import { dbConnect } from "@/utils/dbConnect";
-import Room from "@/models/Room";
+import { dbConnect } from "/utils/dbConnect";
+import Room from "../../models/Room";
 import rooms from "@/additionals/rooms";
 import Category from "@/models/Category";
 import categories from "@/additionals/categories";
 dbConnect();
+
 
 export default async function load(req, res) {
   try {
@@ -17,6 +18,8 @@ export default async function load(req, res) {
   }
 }
 
+
+
 const loadCategories = async () => {
   const count = await Category.countDocuments();
   if (count > 0) {
@@ -26,6 +29,8 @@ const loadCategories = async () => {
   console.log("categorias en mongo Atlas");
   await Category.insertMany(categories);
 };
+
+
 
 const loadRooms = async () => {
   const count = await Room.countDocuments();
