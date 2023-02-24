@@ -34,6 +34,7 @@ const roomSchema = new Schema(
       ref: "Category",
       required: [true, "La categoria es requerida"],
     },
+    reservedBy: [{ type: Schema.Types.ObjectId, ref: "User" }],
     //   user: { type: Schema.Types.ObjectId, ref: "Users" },
   },
   { timestamps: true, versionKey: false }
