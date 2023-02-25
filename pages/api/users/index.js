@@ -11,7 +11,7 @@ return await getUsers(req, res);
 case "POST":
 return await saveUser(req, res);
 default:
-return res.status(405).json({ message: "Método no permitido" });
+return res.status(405).json({ message: "Error" });
 }
 } catch (error) {
 console.error(error);
@@ -35,13 +35,13 @@ const schema = Joi.object({
 nombre: Joi.string().required().max(50),
 correo: Joi.string().email().required(),
 contraseña: Joi.string().required(),
-reservedRooms: [],
+reservedRooms: Joi.array().items(Joi.object())
 });
 const { error } = schema.validate(req.body);
 if (error) {
 return res.status(400).json({ message: error.details[0].message });
 }
-const { nombre, correo, contraseña, rol } = req.body;
+const { nombre, correo, contraseña, reservedRooms } = req.body;
 let existUser = await User.findOne({ correo });
 if (existUser) {
 return res
@@ -53,6 +53,7 @@ await User.create(
 nombre,
 correo,
 contraseña,
+reservedRooms,
 },
 async (err, user) => {
 if (err) {
@@ -63,7 +64,7 @@ return res.status(200).json({
 id: user._id,
 nombre: user.nombre,
 correo: user.correo,
-rol: user.rol,
+reservedRooms: user.reservedRooms,
 });
 }
 );
