@@ -35,12 +35,17 @@ const roomSchema = new Schema(
       ref: "Category",
       required: [true, "La categoria es requerida"],
     },
-    usuariosReservados: [
-      {
-        usuario: { type: Schema.Types.ObjectId, ref: "User" },
-        fechaReserva: { type: Date, default: Date.now },
-      },
-    ],
+    reserved: {
+      type: Boolean,
+      default: false,
+    },
+    reservedBy: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+    },
+    reservationDate: {
+      type: Date,
+    },
     enOferta: {
       default: false,
       type: Boolean,
