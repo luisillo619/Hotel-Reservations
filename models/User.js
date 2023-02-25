@@ -7,7 +7,10 @@ const userSchema = new Schema(
       required: [true, "El nombre de usuario es requerido"],
       unique: true,
       trim: true,
-      maxlength: [20, "El nombre de usuario debería ser menor de 20 caracteres"],
+      maxlength: [
+        20,
+        "El nombre de usuario debería ser menor de 20 caracteres",
+      ],
     },
     correo: {
       type: String,
@@ -22,9 +25,35 @@ const userSchema = new Schema(
       trim: true,
       minlength: [8, "La contraseña debe tener al menos 8 caracteres"],
     },
-    reservedRooms: [{ type: Schema.Types.ObjectId, ref: "Room" }],
+    habitacionesReservadas: [
+      {
+        habitacion: { type: Schema.Types.ObjectId, ref: "Room" },
+        fechaReserva: { type: Date, default: Date.now },
+      },
+    ],
+    isAdmin: {
+      default: false,
+      type: Boolean,
+    },
   },
   { timestamps: true, versionKey: false }
 );
 
 export default models?.User || model("User", userSchema);
+
+// const user = new User({
+//   nombre: "John",
+//   correo: "john@example.com",
+//   contraseña: "password123",
+//   habitacionesReservadas: [
+//     { habitacion: roomId }
+//   ]
+// });
+
+// await user.save();
+
+// const user = await User.findById(userId);
+
+// user.habitacionesReservadas.push({ habitacion: roomId });
+
+// await user.save();
