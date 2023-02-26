@@ -8,6 +8,7 @@ const roomSchema = new Schema(
       unique: true,
       trim: true,
       maxlength: [50, "El deberia ser menor de 50 caracteres"],
+      index: true, // Agregar un índice a la propiedad "nombre"
     },
     precio: {
       type: Number,
@@ -34,9 +35,20 @@ const roomSchema = new Schema(
       ref: "Category",
       required: [true, "La categoria es requerida"],
     },
-    //   user: { type: Schema.Types.ObjectId, ref: "Users" },
+
+    usuariosReservados: [
+      {
+        reservacionId: { type: Schema.Types.ObjectId, ref: "Reservation" },
+        usuarioId: { type: Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
+    enOferta: {
+      default: false,
+      type: Boolean,
+    },
   },
-  { timestamps: true, versionKey: false }
+  { versionKey: false }
 );
 
 export default models?.Room || model("Room", roomSchema);
+

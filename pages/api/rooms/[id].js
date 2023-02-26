@@ -1,7 +1,13 @@
 import { dbConnect } from "@/utils/dbConnect";
 import Joi from "joi";
+import mongoose from "mongoose";
+import Room from "@/models/Room";
+import Category from "@/models/Category";
+
+// Conexión a la base de datos
 dbConnect();
 
+// Función manejadora de la ruta /api/rooms/[id]
 export default async function handlerRoomId(req, res) {
   try {
     switch (req.method) {
@@ -19,59 +25,99 @@ export default async function handlerRoomId(req, res) {
   }
 }
 
+// Función para eliminar una habitacion por su id
 const deleteRoom = async (req, res) => {
-    try {
-      const { id } = req.query; // obtener el id de la sala a eliminar desde la URL
-      const { value, error } = Joi.object({
-        id: Joi.string().required(),
-      }).validate({ id });
-  
-      if (error) {
-        return res.status(400).json({ message: "Parámetros inválidos" });
-      }
-  
-      const deletedRoom = await Room.findByIdAndDelete(id); // eliminar la sala de la base de datos
-      if (!deletedRoom) {
-        return res.status(404).json({ message: "Sala no encontrada" });
-      }
-  
-      return res.status(204).end(); // retornar una respuesta sin contenido
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error del servidor" });
-    }
-  };
+  const session = await mongoose.startSession();
+  const { id } = req.query;
 
-  const updateRoom = async (req, res) => {
-    try {
-      const { id } = req.query; // obtener el id de la sala a actualizar desde la URL
-      const { name, description } = req.body; // obtener los nuevos datos de la sala desde el cuerpo de la solicitud
-      const { value, error } = Joi.object({
-        id: Joi.string().required(),
-        nombre: Joi.string().required(),
-        descripcion: Joi.string().required(),
-      }).validate({ id, name, description });
-  
-      if (error) {
-        return res.status(400).json({ message: "Parámetros inválidos" });
+  try {
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({ message: "Id inválido" });
+    }
+
+    await session.withTransaction(async (session) => {
+      const deletedRoom = await Room.findByIdAndDelete(id).session(session);
+
+      if (!deletedRoom) {
+        res.status(404).json({ message: "Habitacion no encontrada" });
       }
-  
+
+      return res.status(204).end();
+    });
+  } catch (error) {
+    console.error(error);
+    const status = error.status || 500;
+    const message =
+      error.message || "Ocurrió un error al eliminar la habitación";
+    return res.status(status).json({ message });
+  } finally {
+    await session.endSession();
+  }
+};
+
+// Función para actualizar una habitacion por su id
+const updateRoom = async (req, res) => {
+  const { id } = req.query;
+  const { nombre, precio, descripcion, imagen, stock, categoria } = req.body;
+  const session = await mongoose.startSession();
+  try {
+    const categoryInDb = await Category.findOne({ nombre: categoria });
+    if (!categoryInDb) {
+      res.status(409).json({
+        message: `La categoría ${categoria} no existe, favor de crearla`,
+      });
+    }
+
+    const { error } = Joi.object({
+      nombre: Joi.string().required().max(50),
+      precio: Joi.number().required().max(99999),
+      descripcion: Joi.string().required(),
+      imagen: Joi.string().required(),
+      stock: Joi.number().required().min(0),
+      categoria: Joi.string().required(),
+    }).validate(req.body);
+
+    if (error) {
+      res.status(400).json({
+        message: error.details[0].message,
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        message: "Id invalido",
+      });
+    }
+
+    await session.withTransaction(async (session) => {
       const updatedRoom = await Room.findByIdAndUpdate(
         id,
-        { name, description },
-        { new: true }
-      ); // actualizar la sala en la base de datos
+        {
+          nombre,
+          precio,
+          descripcion,
+          imagen,
+          stock,
+          categoria: categoryInDb._id,
+        },
+        { new: true, session }
+      ).session(session);
+
       if (!updatedRoom) {
-        return res.status(404).json({ message: "Sala no encontrada" });
+        res.status(404).json({
+          message: "Sala no encontrada",
+        });
       }
-  
-      return res.status(200).json({ room: updatedRoom }); // retornar la sala actualizada
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: "Error del servidor" });
-    }
-  };
-  
-  
-  
-  
+
+      return res.status(200).json(updatedRoom);
+    });
+  } catch (error) {
+    console.error(error);
+    const status = error.status || 500;
+    const message =
+      error.message || "Ocurrió un error al eliminar la habitación";
+    return res.status(status).json({ message });
+  } finally {
+    await session.endSession();
+  }
+};

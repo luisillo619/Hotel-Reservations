@@ -1,3 +1,4 @@
+import { Layout } from "@/components/Layout";
 import axios from "axios";
 
 export default function Home({ rooms }) {
@@ -18,7 +19,9 @@ export default function Home({ rooms }) {
 
 export async function getServerSideProps(context) {
   try {
-    const { data } = await axios.get("http://localhost:3000/api/rooms");
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/rooms`
+    );
     return {
       props: {
         rooms: data,
