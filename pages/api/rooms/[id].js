@@ -27,34 +27,47 @@ export default async function handlerRoomId(req, res) {
 
 // Función para eliminar una habitacion por su id
 const deleteRoom = async (req, res) => {
+  const session = await mongoose.startSession();
+  const { id } = req.query;
+
   try {
-    const { id } = req.query;
     if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Id inválido" });
-    }
-    const deletedRoom = await Room.findByIdAndDelete(id);
-
-    if (!deletedRoom) {
-      return res.status(404).json({ message: "Sala no encontrada" });
+      res.status(400).json({ message: "Id inválido" });
     }
 
-    return res.status(204).end();
+    await session.withTransaction(async (session) => {
+      const deletedRoom = await Room.findByIdAndDelete(id).session(session);
+
+      if (!deletedRoom) {
+        res.status(404).json({ message: "Habitacion no encontrada" });
+      }
+
+      return res.status(204).end();
+    });
   } catch (error) {
-    return res.status(500).json({ message: "Error del servidor" });
+    console.error(error);
+    const status = error.status || 500;
+    const message =
+      error.message || "Ocurrió un error al eliminar la habitación";
+    return res.status(status).json({ message });
+  } finally {
+    await session.endSession();
   }
 };
 
 // Función para actualizar una habitacion por su id
 const updateRoom = async (req, res) => {
+  const { id } = req.query;
+  const { nombre, precio, descripcion, imagen, stock, categoria } = req.body;
+  const session = await mongoose.startSession();
   try {
-    const { id } = req.query;
-    const { nombre, precio, descripcion, imagen, stock, categoria } = req.body;
     const categoryInDb = await Category.findOne({ nombre: categoria });
     if (!categoryInDb) {
-      return res.status(409).json({
-        message: `la categoria ${categoria} no existe, favor de crearla`,
+      res.status(409).json({
+        message: `La categoría ${categoria} no existe, favor de crearla`,
       });
     }
+
     const { error } = Joi.object({
       nombre: Joi.string().required().max(50),
       precio: Joi.number().required().max(99999),
@@ -65,30 +78,46 @@ const updateRoom = async (req, res) => {
     }).validate(req.body);
 
     if (error) {
-      return res.status(400).json({ message: error.details[0].message });
-    }
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        return res.status(400).json({ message: "Id inválido" });
-      }
-    const updatedRoom = await Room.findByIdAndUpdate(
-      id,
-      {
-        nombre,
-        precio,
-        descripcion,
-        imagen,
-        stock,
-        categoria: categoryInDb._id,
-      },
-      { new: true }
-    );
-    if (!updatedRoom) {
-      return res.status(404).json({ message: "Sala no encontrada" });
+      res.status(400).json({
+        message: error.details[0].message,
+      });
     }
 
-    return res.status(200).json(updatedRoom);
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        message: "Id invalido",
+      });
+    }
+
+    await session.withTransaction(async (session) => {
+      const updatedRoom = await Room.findByIdAndUpdate(
+        id,
+        {
+          nombre,
+          precio,
+          descripcion,
+          imagen,
+          stock,
+          categoria: categoryInDb._id,
+        },
+        { new: true, session }
+      ).session(session);
+
+      if (!updatedRoom) {
+        res.status(404).json({
+          message: "Sala no encontrada",
+        });
+      }
+
+      return res.status(200).json(updatedRoom);
+    });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error del servidor" });
+    const status = error.status || 500;
+    const message =
+      error.message || "Ocurrió un error al eliminar la habitación";
+    return res.status(status).json({ message });
+  } finally {
+    await session.endSession();
   }
 };
