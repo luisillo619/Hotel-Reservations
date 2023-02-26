@@ -1,23 +1,29 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, models } = require("mongoose");
 
 const reservationSchema = new Schema(
   {
-    room: {
+    habitacionId: {
       type: Schema.Types.ObjectId,
       ref: "Room",
       required: true,
     },
-    user: {
+    usuarioId: {
       type: Schema.Types.ObjectId,
       ref: "User",
       required: true,
     },
-    reservationDate: {
+
+    fechaDeReserva: {
       type: Date,
-      required: true,
+      default: Date.now,
     },
+    estado: {
+      type: String,
+      enum: ['pendiente', 'confirmada', 'cancelada'],
+      default: 'pendiente',
+    }
   },
-  { timestamps: true, versionKey: false }
+  { versionKey: false }
 );
 
 export default models?.Reservation || model("Reservation", reservationSchema);
