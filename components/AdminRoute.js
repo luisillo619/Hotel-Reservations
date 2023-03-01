@@ -1,4 +1,4 @@
-import { useSession } from "next-auth/client";
+import { useSession } from "next-auth/react";
 
 export default function AdminRoute({ children }) {
   const [session] = useSession();

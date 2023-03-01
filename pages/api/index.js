@@ -1,10 +1,10 @@
-import { dbConnect } from "/utils/dbConnect";
+import { dbConnect } from "@/utils/dbConnect";
 import Room from "../../models/Room";
 import rooms from "@/additionals/rooms";
 import Category from "@/models/Category";
 import categories from "@/additionals/categories";
+import mongoose from "mongoose";
 dbConnect();
-
 
 export default async function load(req, res) {
   try {
@@ -18,36 +18,48 @@ export default async function load(req, res) {
   }
 }
 
-
-
 const loadCategories = async () => {
-  const count = await Category.countDocuments();
-  if (count > 0) {
-    console.log("categorias cargadas anteriormente");
-    return;
+  try {
+    const count = await Category.countDocuments();
+    if (count > 0) {
+      console.log("Categorías cargadas anteriormente");
+      return;
+    }
+    console.log("Cargando categorías en MongoDB Atlas...");
+    await Category.insertMany(categories);
+    console.log("Categorías cargadas correctamente");
+  } catch (error) {
+    console.log(`Error al cargar categorías: ${error}`);
+    throw error;
   }
-  console.log("categorias en mongo Atlas");
-  await Category.insertMany(categories);
 };
 
-
-
 const loadRooms = async () => {
-  const count = await Room.countDocuments();
-  if (count > 0) {
-    console.log("habitaciones cargadas anteriormente");
-    return;
-  }
-  const roomsCategories = await rooms.map(async (e) => {
-    return await Category.findOne({ nombre: e.categoria });
-  });
-  const categoryData = await Promise.all(roomsCategories);
-
-  for (let i = 0; i < rooms.length; i++) {
-    if (rooms[i].categoria === categoryData[i].nombre) {
-      rooms[i].categoria = categoryData[i]._id;
+  try {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    const count = await Room.countDocuments();
+    if (count > 0) {
+      console.log("Habitaciones cargadas anteriormente");
+      return;
     }
+    console.log("Cargando habitaciones en MongoDB Atlas...");
+    const roomCategories = await Promise.all(
+      rooms.map(async (e) => {
+        return await Category.findOne({ nombre: e.categoria });
+      })
+    );
+    rooms.forEach((room, index) => {
+      room.categoria = roomCategories[index]._id;
+    });
+    await Room.insertMany(rooms);
+    console.log("Habitaciones cargadas correctamente");
+    await session.commitTransaction();
+    session.endSession();
+  } catch (error) {
+    console.log(`Error al cargar habitaciones: ${error}`);
+    await session.abortTransaction();
+    session.endSession();
+    throw error;
   }
-  await Room.insertMany(rooms);
-  console.log("habitaciones en mongo Atlas");
 };

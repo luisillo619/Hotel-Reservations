@@ -35,32 +35,20 @@ const roomSchema = new Schema(
       ref: "Category",
       required: [true, "La categoria es requerida"],
     },
-    reserved: {
-      type: Boolean,
-      default: false,
-    },
-    reservedBy: {
-      type: Schema.Types.ObjectId,
-      ref: "User",
-    },
-    reservationDate: {
-      type: Date,
-    },
+
+    usuariosReservados: [
+      {
+        reservacionId: { type: Schema.Types.ObjectId, ref: "Reservation" },
+        usuarioId: { type: Schema.Types.ObjectId, ref: "User" },
+      },
+    ],
     enOferta: {
       default: false,
       type: Boolean,
     },
   },
-  { timestamps: true, versionKey: false }
+  { versionKey: false }
 );
-// roomSchema.path("stock").validate(function (value) {
-//   return value >= 0;
-// }, "El stock debe ser igual o mayor a 0");
 
 export default models?.Room || model("Room", roomSchema);
 
-// // Buscar el usuario por su identificador y agregar la habitación reservada
-// const user = await User.findByIdAndUpdate(userID, { $push: { habitacionesReservadas: roomID } });
-
-// // Buscar la habitación por su identificador y agregar el usuario que la reservó
-// const room = await Room.findByIdAndUpdate(roomID, { $push: { reservadoPor: userID } });
