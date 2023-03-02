@@ -30,7 +30,6 @@ const userSchema = new Schema(
         habitacionId: { type: Schema.Types.ObjectId, ref: "Room" },
       },
     ],
-    // reservedRooms: [{ type: Schema.Types.ObjectId, ref: "Room" }],
     isAdmin: {
       default: false,
       type: Boolean,

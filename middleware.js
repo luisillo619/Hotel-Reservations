@@ -1,17 +1,19 @@
+// middleware.ts
+// NEXTAUTH_SECRET SE RECOJE AUTOMATICAMENTE POR EL MIDDELWARE
 import { withAuth } from "next-auth/middleware";
-import { NextResponse } from "next/server";
 
-// VERIFICAR IS ADMIN
+// la diferencia del middleware nativo y with auth es que withAuth hace la verificacion de sesion automaticamente, y si no la tiene hace la redireccion a page de [...nextauth].js y podemos agregar una verificacion entra como admin, pero en el middleware nativo se tiene que verificar si existe la sesion y aparte verificar si es admin. En conlucion, withAuth te ahorra un paso
 export default withAuth(
-  async function middleware(req) {
-    return NextResponse.rewrite(new URL("/admin", req.url));
+  // `withAuth` augments your `Request` with the user's token.
+  function middleware(req) {
+    console.log(req.nextauth.token);
   },
   {
     callbacks: {
-      // si esto es true, entonces el middelware se activa
+      // MIDDLEWARE SE ACTIVARA SI TOKEN?.ROLE === "ADMIN" = TRUE
       authorized({ token }) {
-        // return token?.role === "admin";
-        return true
+        console.log("token", token);
+        return token?.role === "admin";
       },
     },
   }
