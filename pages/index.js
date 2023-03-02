@@ -3,7 +3,7 @@ import axios from "axios";
 
 export default function Home({ rooms }) {
 
-  
+
   if (rooms) {
     return (
       <>
@@ -40,21 +40,3 @@ export async function getServerSideProps(context) {
 
 
 
-//Esto se encarga de renderizar en pantalla
-export default function Home ({ rooms }) {
- 
-  if (rooms) {
-    return (
-      <>
-         {/* {rooms.map((e) => {
-          return (
-            <div key={e._id}>
-              <p>{e.nombre}</p>
-            </div>
-          );
-        })} */}
-        <Layout />
-      </>
-    );
-  };
-};

@@ -3,6 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { compare } from "bcrypt";
 import { dbConnect } from "@/utils/dbConnect";
 import User from "@/models/User";
+
 export const authOptions = {
   session: {
     strategy: "jwt",
