@@ -1,9 +1,9 @@
-import { Layout } from '@/components/Layout';
+// import { Layout } from '@/components/Layout';
 
 
 export default function Landing () {
   return (
-    <Layout>
+    <div>
       
       <h1 ></h1>
       <div >
@@ -13,6 +13,6 @@ export default function Landing () {
       <div></div>
 
 
-    </Layout>
+    </div>
   );
 };

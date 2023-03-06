@@ -2,6 +2,8 @@ import { Layout } from "@/components/Layout";
 import axios from "axios";
 
 export default function Home({ rooms }) {
+
+
   if (rooms) {
     return (
       <>
@@ -35,3 +37,6 @@ export async function getServerSideProps(context) {
     };
   }
 }
+
+
+
